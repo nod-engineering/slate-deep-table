@@ -60,13 +60,11 @@ class Example extends React.Component {
   };
 
   onMergeRight = () => {
-    this.onChange(this.editor.mergeRight());
-    window.editor = this.editor;
+    this.onChange(this.editor.mergeCell({ direction: 'right'}));
   };
 
   onMergeDown = () => {
-    this.onChange(this.editor.mergeDown());
-    window.editor = this.editor;
+    this.onChange(this.editor.mergeCell({ direction: 'down'}));
   };
 
   renderNormalToolbar = () => {
