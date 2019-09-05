@@ -41,11 +41,13 @@ function mergeCell(opts, editor, mergeOptions) {
         var firstCell = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex());
         var span = firstCell.data.get(spanAttribute) || 1;
         var nextCell = null;
+        var numCellsIsEqual = true;
+        var thisRow = table.nodes.get(pos.getRowIndex());
+        var nextRow = table.nodes.get(pos.getRowIndex() + span);
 
         if (direction === directions.down) {
-            var nextRow = table.nodes.get(pos.getRowIndex() + span);
-
             if (nextRow) {
+
                 nextCell = nextRow.nodes.get(pos.getColumnIndex());
             }
         } else {
@@ -53,20 +55,33 @@ function mergeCell(opts, editor, mergeOptions) {
         }
 
         if (nextCell && nextCell.type === opts.typeCell) {
-            var paragraphs = nextCell.nodes.map(function (node) {
-                return Slate.Block.fromJSON(node.toJSON());
-            });
 
-            for (var i = 0; i < paragraphs.size; i++) {
-                editor.insertNodeByKey(firstCell.key, firstCell.nodes.size + i, paragraphs.get(i));
+            if (direction === direction.down) {} else {
+                numCellsIsEqual = firstCell.data.get(spanTypes.rowSpan) === nextCell.data.get(spanTypes.rowSpan);
             }
 
-            var firstCellData = firstCell.data.toJSON();
-            firstCellData['' + spanAttribute] = span + 1;
+            if (numCellsIsEqual) {
+                var paragraphs = nextCell.nodes.map(function (node) {
+                    return Slate.Block.fromJSON(node.toJSON());
+                });
 
-            var nextCellData = Object.assign({ data: { 'display': 'none', mergeDirection: direction } }, nextCell.data.toJSON());
+                for (var i = 0; i < paragraphs.size; i++) {
+                    editor.insertNodeByKey(firstCell.key, firstCell.nodes.size + i, paragraphs.get(i));
+                }
 
-            editor.setNodeByKey(firstCell.key, { data: firstCellData }).setNodeByKey(nextCell.key, nextCellData);
+                var firstCellData = firstCell.data.toJSON();
+                firstCellData['' + spanAttribute] = span + 1;
+
+                var nextCellData = Object.assign({ data: { 'display': 'none', mergeDirection: direction } }, nextCell.data.toJSON());
+
+                editor.setNodeByKey(firstCell.key, { data: firstCellData }).setNodeByKey(nextCell.key, nextCellData);
+
+                if (nextRow.nodes.count(function (node) {
+                    return node.data.get('display') !== 'none';
+                }) === 0) {
+                    editor.removeNodeByKey(nextRow.key);
+                }
+            }
         }
     }
 
