@@ -64,7 +64,7 @@ function mergeCell(opts, editor, mergeOptions) {
             var firstCellData = firstCell.data.toJSON();
             firstCellData['' + spanAttribute] = span + 1;
 
-            var nextCellData = Object.assign({ data: { 'display': 'none' } }, nextCell.data.toJSON());
+            var nextCellData = Object.assign({ data: { 'display': 'none', mergeDirection: direction } }, nextCell.data.toJSON());
 
             editor.setNodeByKey(firstCell.key, { data: firstCellData }).setNodeByKey(nextCell.key, nextCellData);
         }
