@@ -32,9 +32,10 @@ function mergeCell(opts, editor, mergeOptions) {
 
 
     var isHeadless = table.data.get('headless');
+    var direction = mergeOptions.direction;
 
-    if (isHeadless || !isHeadless && pos.getRowIndex() > 0) {
-        var direction = mergeOptions.direction;
+
+    if (isHeadless || !isHeadless && pos.getRowIndex() > 0 || direction === directions.right) {
 
         var spanAttribute = direction === directions.right ? spanTypes.colSpan : spanTypes.rowSpan;
         var firstCell = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex());

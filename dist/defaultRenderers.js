@@ -31,8 +31,8 @@ var makeRenderers = function makeRenderers() {
         var rowspan = props.node.data.get('rowspan');
         var display = props.node.data.get('display');
 
-        if (colspan) props.attributes.colspan = colspan;
-        if (rowspan) props.attributes.rowspan = rowspan;
+        if (colspan) props.attributes.colSpan = colspan;
+        if (rowspan) props.attributes.rowSpan = rowspan;
         if (display && display === 'none') props.attributes.style = { display: 'none' };
 
         switch (props.node.type) {
