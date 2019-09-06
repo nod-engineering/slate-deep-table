@@ -23,6 +23,12 @@ var directions = {
     right: 'right'
 };
 
+var getNodeContentsAsBlocks = function getNodeContentsAsBlocks(node) {
+    return node.nodes.map(function (innerNode) {
+        return Slate.Block.fromJSON(innerNode.toJSON());
+    });
+};;
+
 function mergeCell(opts, editor, mergeOptions) {
     var value = editor.value;
     var startBlock = value.startBlock;
@@ -32,7 +38,8 @@ function mergeCell(opts, editor, mergeOptions) {
 
 
     var isHeadless = table.data.get('headless');
-    var direction = mergeOptions.direction;
+    var direction = mergeOptions.direction,
+        mergeType = mergeOptions.mergeType;
 
 
     if (isHeadless || !isHeadless && pos.getRowIndex() > 0 || direction === directions.right) {
@@ -40,47 +47,37 @@ function mergeCell(opts, editor, mergeOptions) {
         var spanAttribute = direction === directions.right ? spanTypes.colSpan : spanTypes.rowSpan;
         var firstCell = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex());
         var span = firstCell.data.get(spanAttribute) || 1;
-        var nextCell = null;
-        var numCellsIsEqual = true;
-        var thisRow = table.nodes.get(pos.getRowIndex());
+        var firstCellDirection = firstCell.data.get('mergeDirection') || direction;
         var nextRow = table.nodes.get(pos.getRowIndex() + span);
+        var nextCell = null;
 
-        if (direction === directions.down) {
-            if (nextRow) {
+        if (direction === firstCellDirection) {
 
-                nextCell = nextRow.nodes.get(pos.getColumnIndex());
-            }
-        } else {
-            nextCell = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex() + span);
-        }
-
-        if (nextCell && nextCell.type === opts.typeCell) {
-
-            if (direction === direction.down) {} else {
-                numCellsIsEqual = firstCell.data.get(spanTypes.rowSpan) === nextCell.data.get(spanTypes.rowSpan);
+            if (direction === directions.down) {
+                if (nextRow) {
+                    nextCell = nextRow.nodes.get(pos.getColumnIndex());
+                }
+            } else {
+                nextCell = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex() + span);
             }
 
-            if (numCellsIsEqual) {
-                var paragraphs = nextCell.nodes.map(function (node) {
-                    return Slate.Block.fromJSON(node.toJSON());
-                });
+            if (nextCell && nextCell.type === opts.typeCell) {
 
-                for (var i = 0; i < paragraphs.size; i++) {
-                    editor.insertNodeByKey(firstCell.key, firstCell.nodes.size + i, paragraphs.get(i));
+                var cellContents = getNodeContentsAsBlocks(nextCell);
+
+                for (var i = 0; i < cellContents.size; i++) {
+                    editor.insertNodeByKey(firstCell.key, firstCell.nodes.size + i, cellContents.get(i));
                 }
 
                 var firstCellData = firstCell.data.toJSON();
                 firstCellData['' + spanAttribute] = span + 1;
+                firstCellData['mergeDirection'] = direction;
 
-                var nextCellData = Object.assign({ data: { 'display': 'none', mergeDirection: direction } }, nextCell.data.toJSON());
+                var nextCellData = nextCell.data.toJSON();
+                nextCellData['display'] = 'none';
+                nextCellData['mergeDirection'] = direction;
 
-                editor.setNodeByKey(firstCell.key, { data: firstCellData }).setNodeByKey(nextCell.key, nextCellData);
-
-                if (nextRow.nodes.count(function (node) {
-                    return node.data.get('display') !== 'none';
-                }) === 0) {
-                    editor.removeNodeByKey(nextRow.key);
-                }
+                editor.setNodeByKey(firstCell.key, { data: firstCellData }).setNodeByKey(nextCell.key, { data: nextCellData });
             }
         }
     }
