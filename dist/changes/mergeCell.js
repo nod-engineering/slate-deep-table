@@ -38,8 +38,7 @@ function mergeCell(opts, editor, mergeOptions) {
 
 
     var isHeadless = table.data.get('headless');
-    var direction = mergeOptions.direction,
-        mergeType = mergeOptions.mergeType;
+    var direction = mergeOptions.direction;
 
 
     if (isHeadless || !isHeadless && pos.getRowIndex() > 0 || direction === directions.right) {
