@@ -29,11 +29,11 @@ var makeRenderers = function makeRenderers() {
 
         var colspan = props.node.data.get('colspan');
         var rowspan = props.node.data.get('rowspan');
-        var display = props.node.data.get('display');
+        var isMerged = props.node.data.get('isMerged');
 
         if (colspan) props.attributes.colSpan = colspan;
         if (rowspan) props.attributes.rowSpan = rowspan;
-        if (display && display === 'none') props.attributes.style = { display: 'none' };
+        if (isMerged) props.attributes.style = { display: 'none' };
 
         switch (props.node.type) {
             case 'paragraph':
