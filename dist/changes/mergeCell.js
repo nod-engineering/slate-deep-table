@@ -36,7 +36,6 @@ function mergeCell(opts, editor, mergeOptions) {
     var pos = TablePosition.create(value, startBlock, opts);
     var table = pos.table;
 
-
     var isHeadless = table.data.get('headless');
     var direction = mergeOptions.direction;
 
@@ -67,6 +66,10 @@ function mergeCell(opts, editor, mergeOptions) {
                 for (var i = 0; i < cellContents.size; i++) {
                     editor.insertNodeByKey(firstCell.key, firstCell.nodes.size + i, cellContents.get(i));
                 }
+
+                nextCell.nodes.forEach(function (node) {
+                    editor.removeNodeByKey(node.key);
+                });
 
                 var firstCellData = firstCell.data.toJSON();
                 firstCellData['' + spanAttribute] = span + 1;

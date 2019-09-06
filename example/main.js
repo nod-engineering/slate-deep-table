@@ -67,6 +67,10 @@ class Example extends React.Component {
     this.onChange(this.editor.mergeCell({ direction: 'down'}));
   };
 
+  onUnMerge = () => {
+    this.onChange(this.editor.unmergeCell());
+  };
+
   renderNormalToolbar = () => {
     return (
       <div className="buttons">
@@ -87,6 +91,7 @@ class Example extends React.Component {
         <button onClick={this.onToggleHeaders}>Toggle Headers</button>
         <button onClick={this.onMergeRight}>Merge Right</button>
         <button onClick={this.onMergeDown}>Merge Down</button>
+        <button onClick={this.onUnMerge}>Un-merge</button>
       </div>
     );
   };

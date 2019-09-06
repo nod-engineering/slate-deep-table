@@ -14,6 +14,7 @@ var moveTableSelection = require('./changes/moveSelection');
 var moveTableSelectionBy = require('./changes/moveSelectionBy');
 var toggleTableHeaders = require('./changes/toggleHeaders');
 var mergeCell = require('./changes/mergeCell');
+var unmergeCell = require('./changes/unmergeCell');
 
 var TablePosition = require('./TablePosition');
 var onTab = require('./onTab');
@@ -126,7 +127,8 @@ function EditTable(opts) {
             moveTableSelection: bindEditor(moveTableSelection),
             moveTableSelectionBy: bindEditor(moveTableSelectionBy),
             toggleTableHeaders: bindEditor(toggleTableHeaders),
-            mergeCell: bindEditor(mergeCell)
+            mergeCell: bindEditor(mergeCell),
+            unmergeCell: bindEditor(unmergeCell)
         }
     };
 }
