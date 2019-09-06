@@ -3,6 +3,8 @@
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var insertTable = require('./changes/insertTable');
+var insertTableByKey = require('./changes/insertTableByKey');
+var insertTableByPath = require('./changes/insertTableByPath');
 var insertRow = require('./changes/insertRow');
 var removeRow = require('./changes/removeRow');
 var insertColumn = require('./changes/insertColumn');
@@ -114,6 +116,8 @@ function EditTable(opts) {
 
         commands: {
             insertTable: insertTable.bind(null, opts),
+            insertTableByKey: insertTableByKey.bind(null, opts),
+            insertTableByPath: insertTableByPath.bind(null, opts),
             insertRow: bindEditor(insertRow),
             removeRow: bindEditor(removeRow),
             insertColumn: bindEditor(insertColumn),
