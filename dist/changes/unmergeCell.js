@@ -1,7 +1,5 @@
 'use strict';
 
-var createRow = require('../createRow');
-var Slate = require("slate");
 var TablePosition = require('../TablePosition');
 
 /**
@@ -13,22 +11,6 @@ var TablePosition = require('../TablePosition');
  * @return {Slate.Editor}
  */
 
-var spanTypes = {
-    colSpan: 'colspan',
-    rowSpan: 'rowspan'
-};
-
-var directions = {
-    down: 'down',
-    right: 'right'
-};
-
-var getNodeContentsAsBlocks = function getNodeContentsAsBlocks(node) {
-    return node.nodes.map(function (innerNode) {
-        return Slate.Block.fromJSON(innerNode.toJSON());
-    });
-};;
-
 function unmergeCell(opts, editor) {
     var value = editor.value;
     var startBlock = value.startBlock;
@@ -38,39 +20,26 @@ function unmergeCell(opts, editor) {
 
 
     var firstCell = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex());
-    var firstCellDirection = firstCell.data.get('mergeDirection');
-    var spanAttribute = firstCellDirection === directions.right ? spanTypes.colSpan : spanTypes.rowSpan;
-    var span = firstCell.data.get(spanAttribute) || 1;
-    var nextRow = table.nodes.get(pos.getRowIndex() + span - 1);
-    var nextCell = null;
+    var colSpan = firstCell.data.get('colspan') || 1;
+    var rowSpan = firstCell.data.get('rowspan') || 1;
 
-    console.log(firstCellDirection);
-    console.log(span);
+    editor.withoutNormalizing(function () {
+        for (var rowCount = 0; rowCount < rowSpan; rowCount += 1) {
+            for (var columnCount = 0; columnCount < colSpan; columnCount += 1) {
+                var cell = table.nodes.get(pos.getRowIndex() + rowCount).nodes.get(pos.getColumnIndex() + columnCount);
 
-    if (firstCellDirection && span > 1) {
-
-        console.log('do it');
-        if (firstCellDirection === directions.down) {
-            if (nextRow) {
-                nextCell = nextRow.nodes.get(pos.getColumnIndex());
+                var data = cell.data.toJSON();
+                data.isMerged = false;
+                data.colspan = 1;
+                data.rowspan = 1;
+                data.mergeDirection = null;
+                editor.setNodeByKey(cell.key, {
+                    data: data
+                });
             }
-        } else {
-            nextCell = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex() + span - 1);
         }
-
-        if (nextCell && nextCell.type === opts.typeCell) {
-
-            var firstCellData = firstCell.data.toJSON();
-            firstCellData['' + spanAttribute] = span - 1;
-
-            var nextCellData = nextCell.data.toJSON();
-            nextCellData['isMerged'] = false;
-
-            editor.setNodeByKey(firstCell.key, { data: firstCellData }).setNodeByKey(nextCell.key, { data: nextCellData });
-        }
-    } else {
-        console.log('not a merged cell');
-    }
+        editor.focus();
+    });
 
     return editor;
 }

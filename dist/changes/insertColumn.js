@@ -1,8 +1,5 @@
 'use strict';
 
-var _require = require('immutable'),
-    List = _require.List;
-
 var TablePosition = require('../TablePosition');
 var moveSelection = require('./moveSelection');
 var createCell = require('../createCell');
@@ -17,7 +14,8 @@ var createCell = require('../createCell');
  */
 function insertColumn(opts, editor, at) {
     var value = editor.value;
-    var startBlock = value.startBlock;
+    var startBlock = value.startBlock,
+        document = value.document;
 
 
     var pos = TablePosition.create(value, startBlock, opts);
@@ -25,14 +23,63 @@ function insertColumn(opts, editor, at) {
 
 
     if (typeof at === 'undefined') {
-        at = pos.getColumnIndex() + 1;
+        at = pos.getColumnIndex() + (pos.cell.data.get('colspan') || 1);
     }
+
+    var newCells = [];
+    var initialMergeCells = [];
+    var column = table.nodes.map(function (row) {
+        return row.nodes.get(at);
+    });
+
+    table.nodes.forEach(function (rowNode, index) {
+        var node = rowNode.nodes.get(at);
+        var isMerged = node.data.get('isMerged');
+        var mergeDirection = node.data.get('mergeDirection');
+        var mergeCentre = node.data.get('mergeCentre');
+
+        var newCell = createCell(opts);
+
+        if (isMerged) {
+            if (mergeDirection.right && rowNode.nodes.find(function (rowCell) {
+                return rowCell.key === mergeCentre;
+            })) {
+                var selectedCell = document.getNode(mergeCentre);
+                if (selectedCell && selectedCell.data.get('colspan') > 1) {
+                    initialMergeCells.push(selectedCell);
+                }
+            }
+            var addMergedCell = false;
+
+            if (mergeDirection.down || mergeDirection.right) {
+                if (mergeDirection.right && !mergeDirection.down && rowNode.nodes.find(function (rowCell) {
+                    return rowCell.key === mergeCentre;
+                })) {
+                    addMergedCell = true;
+                } else if (mergeDirection.right && mergeDirection.down && !column.find(function (cell) {
+                    return cell.key === mergeCentre;
+                })) {
+                    addMergedCell = true;
+                }
+            }
+
+            if (addMergedCell) {
+                newCell = newCell.setIn(['data', 'isMerged'], isMerged);
+                newCell = newCell.setIn(['data', 'mergeDirection'], mergeDirection);
+            }
+        }
+        newCells.push({ rowKey: rowNode.key, newCell: newCell });
+    });
 
     // Insert the new cell
     editor.withoutNormalizing(function () {
-        table.nodes.forEach(function (row) {
-            var newCell = createCell(opts);
-            editor.insertNodeByKey(row.key, at, newCell);
+        newCells.forEach(function (item) {
+            editor.insertNodeByKey(item.rowKey, at, item.newCell);
+        });
+        initialMergeCells.forEach(function (cell) {
+            var initialMergeCellData = cell.data.toJSON();
+            initialMergeCellData.colspan = initialMergeCellData.colspan + 1;
+            editor.setNodeByKey(cell.key, { data: initialMergeCellData });
         });
     });
 

@@ -34,7 +34,7 @@ function moveSelection(opts, editor, x, y) {
         startOffset = cellTextLength;
     }
 
-    return editor.moveTo(cell.getFirstText().key, startOffset);
+    return editor.moveTo(cell.getFirstText().key, startOffset).focus();
 }
 
 module.exports = moveSelection;

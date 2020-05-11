@@ -41,8 +41,8 @@ function EditTable(opts) {
     opts.typeContent = opts.typeContent || 'paragraph';
 
     /**
-     * Is the selection in a table
-     */
+    * Is the selection in a table
+    */
     function isSelectionInTable(editor) {
         var startBlock = editor.value.startBlock;
 
@@ -52,8 +52,8 @@ function EditTable(opts) {
     }
 
     /**
-     * Bind an editor command to our instance options as first arg
-     */
+    * Bind an editor command to our instance options as first arg
+    */
     function bindEditor(fn) {
         return function (editor) {
             if (!isSelectionInTable(editor)) {
@@ -69,8 +69,8 @@ function EditTable(opts) {
     }
 
     /**
-     * User is pressing a key in the editor
-     */
+    * User is pressing a key in the editor
+    */
     function onKeyDown(event, editor, next) {
         // Only handle events in cells
         if (!isSelectionInTable(editor)) {
@@ -103,16 +103,72 @@ function EditTable(opts) {
         return TablePosition.create(editor.value, editor.value.startBlock, opts);
     }
 
+    function canMergeRight(editor) {
+        var value = editor.value;
+        var startBlock = value.startBlock;
+
+        var pos = TablePosition.create(value, startBlock, opts);
+        var table = pos.table;
+
+
+        var selectedCell = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex());
+
+        var span = selectedCell.data.get('colspan') || 1;
+
+        var cellToMerge = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex() + span);
+
+        if (cellToMerge && !cellToMerge.data.get('isMerged') && (!cellToMerge.data.get('rowspan') && selectedCell.data.get('rowspan') === 1 || !selectedCell.data.get('rowspan') && cellToMerge.data.get('rowspan') === 1 || cellToMerge.data.get('rowspan') === selectedCell.data.get('rowspan'))) {
+            return true;
+        } else return false;
+    }
+
+    function canMergeDown(editor) {
+        var value = editor.value;
+        var startBlock = value.startBlock;
+
+        var pos = TablePosition.create(value, startBlock, opts);
+        var table = pos.table;
+
+        var isHeadless = table.data.get('headless');
+        if (!isHeadless && pos.getRowIndex() === 0) return false;
+        var selectedCell = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex());
+
+        var span = selectedCell.data.get('rowspan') || 1;
+        var rowToMerge = table.nodes.get(pos.getRowIndex() + span);
+
+        if (rowToMerge) {
+            var cellToMerge = rowToMerge.nodes.get(pos.getColumnIndex());
+            if (cellToMerge && !cellToMerge.data.get('isMerged') && (!cellToMerge.data.get('colspan') && selectedCell.data.get('colspan') === 1 || !selectedCell.data.get('colspan') && cellToMerge.data.get('colspan') === 1 || cellToMerge.data.get('colspan') === selectedCell.data.get('colspan'))) {
+                return true;
+            } else return false;
+        }
+        return false;
+    }
+
+    function canUnMerge(editor) {
+        var value = editor.value;
+        var startBlock = value.startBlock;
+
+        var pos = TablePosition.create(value, startBlock, opts);
+        var table = pos.table;
+
+        var selectedCell = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex());
+        if (selectedCell.data.get('rowspan') > 1 || selectedCell.data.get('colspan') > 1) return true;
+        return false;
+    }
+
     return {
         onKeyDown: onKeyDown,
-
         schema: schema,
         normalizeNode: normalizeNode,
         renderBlock: renderBlock,
 
         queries: {
             isSelectionInTable: isSelectionInTable,
-            getTablePosition: getPosition
+            getTablePosition: getPosition,
+            canMergeRight: canMergeRight,
+            canMergeDown: canMergeDown,
+            canUnMerge: canUnMerge
         },
 
         commands: {
