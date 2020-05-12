@@ -3,6 +3,7 @@
 var TablePosition = require('../TablePosition');
 var moveSelection = require('./moveSelection');
 var createCell = require('../createCell');
+var getMergeCentre = require('../getMergeCentre');
 
 /**
  * Insert a new column in current table
@@ -36,12 +37,12 @@ function insertColumn(opts, editor, at) {
         var node = rowNode.nodes.get(at);
         var isMerged = node.data.get('isMerged');
         var mergeDirection = node.data.get('mergeDirection');
-        var mergeCentre = node.data.get('mergeCentre');
+        var mergeCentre = node.data.get('mergeCentre') || getMergeCentre({ mergeDirection: mergeDirection, table: table, columnIndex: at, rowIndex: index });
 
         var newCell = createCell(opts);
 
         if (isMerged) {
-            if (mergeDirection.right && rowNode.nodes.find(function (rowCell) {
+            if ((mergeDirection.right || mergeDirection === 'right') && rowNode.nodes.find(function (rowCell) {
                 return rowCell.key === mergeCentre;
             })) {
                 var selectedCell = document.getNode(mergeCentre);
@@ -51,12 +52,12 @@ function insertColumn(opts, editor, at) {
             }
             var addMergedCell = false;
 
-            if (mergeDirection.down || mergeDirection.right) {
-                if (mergeDirection.right && !mergeDirection.down && rowNode.nodes.find(function (rowCell) {
+            if (mergeDirection) {
+                if ((mergeDirection.right || mergeDirection === 'right') && !(mergeDirection.down || mergeDirection === 'down') && rowNode.nodes.find(function (rowCell) {
                     return rowCell.key === mergeCentre;
                 })) {
                     addMergedCell = true;
-                } else if (mergeDirection.right && mergeDirection.down && !column.find(function (cell) {
+                } else if ((mergeDirection.right || mergeDirection === 'right') && (mergeDirection.down || mergeDirection === 'down') && !column.find(function (cell) {
                     return cell.key === mergeCentre;
                 })) {
                     addMergedCell = true;

@@ -1,6 +1,7 @@
 'use strict';
 
 var TablePosition = require('../TablePosition');
+var getMergeCentre = require('../getMergeCentre');
 
 /**
  * Remove current row in a table. Clear it if last remaining row
@@ -31,11 +32,11 @@ function removeRow(opts, editor, at) {
             row.nodes.forEach(function (cell, index) {
                 var isMerged = cell.data.get('isMerged');
                 var mergeDirection = cell.data.get('mergeDirection');
-                var mergeCentre = cell.data.get('mergeCentre');
+                var mergeCentre = cell.data.get('mergeCentre') || getMergeCentre({ mergeDirection: mergeDirection, table: table, columnIndex: index, rowIndex: at });
                 var rowSpan = cell.data.get('rowspan') || 1;
                 var colSpan = cell.data.get('colspan') || 1;
 
-                if (isMerged && mergeDirection.down) {
+                if (isMerged && (mergeDirection.down || mergeDirection === 'down')) {
                     var selectedCell = document.getNode(mergeCentre);
 
                     if (selectedCell && selectedCell.data.get('rowspan') > 1) {

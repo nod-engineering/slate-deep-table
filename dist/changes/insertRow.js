@@ -2,6 +2,7 @@
 
 var createRow = require('../createRow');
 var TablePosition = require('../TablePosition');
+var getMergeCentre = require('../getMergeCentre');
 
 /**
  * Insert a new row in current table
@@ -36,11 +37,11 @@ function insertRow(opts, editor, at, textGetter) {
     if (nextRow) {
         nextRow.nodes.forEach(function (node, index) {
             var isMerged = node.data.get('isMerged');
-            var mergeDirection = node.data.get('mergeDirection');
-            var mergeCentre = node.data.get('mergeCentre');
+            var mergeDirection = node.data.get('mergeDirection') || {};
+            var mergeCentre = node.data.get('mergeCentre') || getMergeCentre({ mergeDirection: mergeDirection, table: table, columnIndex: index, rowIndex: at });
 
             if (isMerged) {
-                if (mergeDirection.down) {
+                if (mergeDirection.down || mergeDirection === 'down') {
                     var row = nextRow.nodes;
                     if (!row.find(function (rowNode) {
                         return rowNode.key === mergeCentre;
@@ -55,7 +56,7 @@ function insertRow(opts, editor, at, textGetter) {
 
                 var addMergedCell = true;
 
-                if (mergeDirection.right) {
+                if (mergeDirection.right || mergeDirection === 'right') {
                     var _row = nextRow.nodes;
                     if (_row.find(function (rowNode) {
                         return rowNode.key === mergeCentre;

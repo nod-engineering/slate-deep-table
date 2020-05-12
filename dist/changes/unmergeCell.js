@@ -29,10 +29,11 @@ function unmergeCell(opts, editor) {
                 var cell = table.nodes.get(pos.getRowIndex() + rowCount).nodes.get(pos.getColumnIndex() + columnCount);
 
                 var data = cell.data.toJSON();
-                data.isMerged = false;
-                data.colspan = 1;
-                data.rowspan = 1;
-                data.mergeDirection = null;
+                delete data.isMerged;
+                delete data.colspan;
+                delete data.rowspan;
+                delete data.mergeCentre;
+                delete data.mergeDirection;
                 editor.setNodeByKey(cell.key, {
                     data: data
                 });
