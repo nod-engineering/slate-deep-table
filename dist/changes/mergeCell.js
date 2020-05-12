@@ -36,6 +36,17 @@ var getNodeContentsAsBlocks = function getNodeContentsAsBlocks(node) {
   })));
 };
 
+var createMergeDirection = function createMergeDirection(currentMergeDirection, additionalMerge) {
+  var updatedMerge = _defineProperty({}, additionalMerge, true);
+  if (currentMergeDirection === 'right' || currentMergeDirection && currentMergeDirection.right) {
+    updatedMerge.right = true;
+  }
+  if (currentMergeDirection === 'down' || currentMergeDirection && currentMergeDirection.down) {
+    updatedMerge.down = true;
+  }
+  return updatedMerge;
+};
+
 function mergeCell(opts, editor, mergeOptions) {
   var value = editor.value;
   var startBlock = value.startBlock;
@@ -123,7 +134,7 @@ function mergeCell(opts, editor, mergeOptions) {
       var firstCellData = firstCell.data.toJSON();
       firstCellData["rowspan"] = rowSpan;
       firstCellData["colspan"] = colSpan;
-      firstCellData["mergeDirection"] = firstCellData.mergeDirection ? Object.assign(firstCellData.mergeDirection, _defineProperty({}, direction, true)) : _defineProperty({}, direction, true);
+      firstCellData["mergeDirection"] = createMergeDirection(firstCellData.mergeDirection, direction);
 
       editor.setNodeByKey(firstCell.key, { data: firstCellData });
 
@@ -134,7 +145,7 @@ function mergeCell(opts, editor, mergeOptions) {
           delete nextCellData.rowspan;
           nextCellData["mergeCentre"] = firstCell.key;
           nextCellData["isMerged"] = true;
-          nextCellData["mergeDirection"] = nextCellData.mergeDirection ? Object.assign(nextCellData.mergeDirection, _defineProperty({}, direction, true)) : _defineProperty({}, direction, true);
+          nextCellData["mergeDirection"] = createMergeDirection(nextCellData.mergeDirection, direction);
           editor.setNodeByKey(nextCell.key, { data: nextCellData });
         });
         editor.focus();
