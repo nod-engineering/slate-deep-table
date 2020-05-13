@@ -26,13 +26,13 @@ function unmergeCell(opts, editor) {
     editor.withoutNormalizing(function () {
         for (var rowCount = 0; rowCount < rowSpan; rowCount += 1) {
             for (var columnCount = 0; columnCount < colSpan; columnCount += 1) {
+
                 var cell = table.nodes.get(pos.getRowIndex() + rowCount).nodes.get(pos.getColumnIndex() + columnCount);
 
                 var data = cell.data.toJSON();
                 delete data.isMerged;
                 delete data.colspan;
                 delete data.rowspan;
-                delete data.mergeCentre;
                 delete data.mergeDirection;
                 editor.setNodeByKey(cell.key, {
                     data: data
