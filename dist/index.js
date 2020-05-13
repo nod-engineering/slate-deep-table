@@ -142,8 +142,8 @@ function EditTable(opts) {
             var pos = TablePosition.create(value, startBlock, opts);
             var table = pos.table;
 
-            var isHeadless = table.data.get('headless');
-            if (!isHeadless && pos.getRowIndex() === 0) return false;
+            var isHeadless = table.data.get('headless') || true;
+            if (!isHeadless) return false;
             var selectedCell = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex());
 
             var span = selectedCell.data.get('rowspan') || 1;

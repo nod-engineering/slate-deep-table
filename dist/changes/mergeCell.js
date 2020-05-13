@@ -58,7 +58,7 @@ function mergeCell(opts, editor, mergeOptions) {
   var direction = mergeOptions.direction;
 
 
-  if (isHeadless || !isHeadless && pos.getRowIndex() > 0 || direction === directions.right) {
+  if (isHeadless || !isHeadless && pos.getRowIndex() >= 0) {
     var firstCell = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex());
     var rowSpan = firstCell.data.get("rowspan") || 1;
     var colSpan = firstCell.data.get("colspan") || 1;
@@ -120,7 +120,7 @@ function mergeCell(opts, editor, mergeOptions) {
 
       var cellContents = (_ref2 = []).concat.apply(_ref2, _toConsumableArray(contents));
       for (var i = 0; i < cellContents.length; i++) {
-        editor.insertNodeByKey(firstCell.key, firstCell.nodes.size + i, cellContents[i]);
+        if (cellContents[i].text !== '') editor.insertNodeByKey(firstCell.key, firstCell.nodes.size + i, cellContents[i]);
       }
 
       editor.withoutNormalizing(function () {
