@@ -15,8 +15,7 @@ var getMergeCentre = require('../getMergeCentre');
  */
 function insertColumn(opts, editor, at) {
     var value = editor.value;
-    var startBlock = value.startBlock,
-        document = value.document;
+    var startBlock = value.startBlock;
 
 
     var pos = TablePosition.create(value, startBlock, opts);
@@ -36,18 +35,18 @@ function insertColumn(opts, editor, at) {
     table.nodes.forEach(function (rowNode, index) {
         var node = rowNode.nodes.get(at);
         var newCell = createCell(opts);
+        console.log('newCell key: ', newCell.key);
         if (node) {
             var isMerged = node.data.get('isMerged');
             var mergeDirection = node.data.get('mergeDirection');
-            var mergeCentre = node.data.get('mergeCentre') || getMergeCentre({ mergeDirection: mergeDirection, table: table, columnIndex: at, rowIndex: index });
+            var mergeCentre = getMergeCentre({ mergeDirection: mergeDirection, table: table, columnIndex: at, rowIndex: index });
 
             if (isMerged) {
                 if ((mergeDirection.right || mergeDirection === 'right') && rowNode.nodes.find(function (rowCell) {
                     return rowCell.key === mergeCentre;
                 })) {
-                    var selectedCell = document.getNode(mergeCentre);
-                    if (selectedCell && selectedCell.data.get('colspan') > 1) {
-                        initialMergeCells.push(selectedCell);
+                    if (mergeCentre && mergeCentre.data.get('colspan') > 1) {
+                        initialMergeCells.push(mergeCentre);
                     }
                 }
                 var addMergedCell = false;

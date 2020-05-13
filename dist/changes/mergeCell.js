@@ -143,7 +143,6 @@ function mergeCell(opts, editor, mergeOptions) {
           var nextCellData = nextCell.data.toJSON();
           delete nextCellData.colspan;
           delete nextCellData.rowspan;
-          nextCellData["mergeCentre"] = firstCell.key;
           nextCellData["isMerged"] = true;
           nextCellData["mergeDirection"] = createMergeDirection(nextCellData.mergeDirection, direction);
           editor.setNodeByKey(nextCell.key, { data: nextCellData });

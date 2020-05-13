@@ -13,8 +13,7 @@ var getMergeCentre = require('../getMergeCentre');
  */
 function removeRow(opts, editor, at) {
     var value = editor.value;
-    var startBlock = value.startBlock,
-        document = value.document;
+    var startBlock = value.startBlock;
 
 
     var pos = TablePosition.create(value, startBlock, opts);
@@ -32,18 +31,16 @@ function removeRow(opts, editor, at) {
             row.nodes.forEach(function (cell, index) {
                 var isMerged = cell.data.get('isMerged');
                 var mergeDirection = cell.data.get('mergeDirection');
-                var mergeCentre = cell.data.get('mergeCentre') || getMergeCentre({ mergeDirection: mergeDirection, table: table, columnIndex: index, rowIndex: at });
+                var mergeCentre = getMergeCentre({ mergeDirection: mergeDirection, table: table, columnIndex: index, rowIndex: at });
                 var rowSpan = cell.data.get('rowspan') || 1;
                 var colSpan = cell.data.get('colspan') || 1;
 
                 if (isMerged && (mergeDirection.down || mergeDirection === 'down')) {
-                    var selectedCell = document.getNode(mergeCentre);
-
-                    if (selectedCell && selectedCell.data.get('rowspan') > 1) {
-                        var initialMergeCellData = selectedCell.data.toJSON();
+                    if (mergeCentre && mergeCentre.data.get('rowspan') > 1) {
+                        var initialMergeCellData = mergeCentre.data.toJSON();
                         initialMergeCellData.rowspan = initialMergeCellData.rowspan - 1;
                         try {
-                            editor.setNodeByKey(selectedCell.key, { data: initialMergeCellData });
+                            editor.setNodeByKey(mergeCentre.key, { data: initialMergeCellData });
                         } catch (e) {
                             console.warn(e);
                         }
