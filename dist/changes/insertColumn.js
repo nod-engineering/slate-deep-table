@@ -35,7 +35,6 @@ function insertColumn(opts, editor, at) {
     table.nodes.forEach(function (rowNode, index) {
         var node = rowNode.nodes.get(at);
         var newCell = createCell(opts);
-        console.log('newCell key: ', newCell.key);
         if (node) {
             var isMerged = node.data.get('isMerged');
             var mergeDirection = node.data.get('mergeDirection');
