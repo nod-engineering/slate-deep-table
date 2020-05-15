@@ -123,7 +123,7 @@ function EditTable(opts) {
 
             var cellToMerge = table.nodes.get(pos.getRowIndex()).nodes.get(pos.getColumnIndex() + span);
 
-            if (cellToMerge && !cellToMerge.data.get('isMerged') && (!cellToMerge.data.get('rowspan') || cellToMerge.data.get('rowspan') === 1) && (!selectedCell.data.get('rowspan') || selectedCell.data.get('rowspan') === 1)) {
+            if (cellToMerge && !cellToMerge.data.get('isMerged') && (!cellToMerge.data.get('rowspan') && selectedCell.data.get('rowspan') === 1 || !selectedCell.data.get('rowspan') && cellToMerge.data.get('rowspan') === 1 || cellToMerge.data.get('rowspan') === selectedCell.data.get('rowspan'))) {
                 return true;
             }
         }
@@ -151,7 +151,7 @@ function EditTable(opts) {
 
             if (rowToMerge) {
                 var cellToMerge = rowToMerge.nodes.get(pos.getColumnIndex());
-                if (cellToMerge && !cellToMerge.data.get('isMerged') && (!cellToMerge.data.get('colspan') || cellToMerge.data.get('colspan') === 1) && (!selectedCell.data.get('colspan') || selectedCell.data.get('colspan') === 1)) {
+                if (cellToMerge && !cellToMerge.data.get('isMerged') && (!cellToMerge.data.get('colspan') && selectedCell.data.get('colspan') === 1 || !selectedCell.data.get('colspan') && cellToMerge.data.get('colspan') === 1 || cellToMerge.data.get('colspan') === selectedCell.data.get('colspan'))) {
                     return true;
                 }
             }

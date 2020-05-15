@@ -1,7 +1,10 @@
 'use strict';
 
 var TablePosition = require('../TablePosition');
-var getMergeCentre = require('../getMergeCentre');
+
+var _require = require('../getMergeCentre'),
+    getMergeCentre = _require.getMergeCentre,
+    getMergeCentreByPath = _require.getMergeCentreByPath;
 
 /**
  * Delete current column in a table
@@ -11,6 +14,8 @@ var getMergeCentre = require('../getMergeCentre');
  * @param {Number} at
  * @return {Slate.Editor}
  */
+
+
 function removeColumn(opts, editor, at) {
     var value = editor.value;
     var startBlock = value.startBlock;
@@ -33,28 +38,43 @@ function removeColumn(opts, editor, at) {
                 var cell = row.nodes.get(at);
                 var isMerged = cell.data.get('isMerged');
                 var mergeDirection = cell.data.get('mergeDirection');
-                var mergeCentre = getMergeCentre({ mergeDirection: mergeDirection, table: table, columnIndex: at, rowIndex: index });
                 var colSpan = cell.data.get('colspan') || 1;
                 var rowSpan = cell.data.get('rowspan') || 1;
 
-                if (isMerged && (mergeDirection.right || mergeDirection === 'right')) {
+                if (isMerged) {
+                    var mergeCentrePath = cell.data.get('mergeCentre') || getMergeCentre({ mergeDirection: mergeDirection, table: table, columnIndex: at, rowIndex: index });
 
-                    if (mergeCentre && mergeCentre.data.get('colspan') > 1) {
-                        var initialMergeCellData = mergeCentre.data.toJSON();
-                        initialMergeCellData.colspan = initialMergeCellData.colspan - 1;
-                        try {
-                            editor.setNodeByKey(mergeCentre.key, { data: initialMergeCellData });
-                        } catch (e) {
-                            console.warn(e);
+                    var _getMergeCentreByPath = getMergeCentreByPath({ path: mergeCentrePath, table: table, cellPosition: { x: at, y: index } }),
+                        mergeCentreNode = _getMergeCentreByPath.mergeCentreNode,
+                        mergeCentreNodePath = _getMergeCentreByPath.mergeCentreNodePath;
+
+                    if ((mergeDirection.right || mergeDirection === 'right') && mergeCentreNodePath.x !== at) {
+
+                        if (mergeCentreNode && mergeCentreNode.data.get('colspan') > 1) {
+                            var initialMergeCellData = mergeCentreNode.data.toJSON();
+                            for (var rowIndex = 0; rowIndex < initialMergeCellData.rowspan || 0; rowIndex += 1) {
+                                for (var columnIndex = 0; columnIndex < initialMergeCellData.colspan || 0; columnIndex += 1) {
+                                    if (!(rowIndex === 0 && columnIndex === 0) && mergeCentreNodePath.x + columnIndex > at) {
+                                        var node = table.nodes.get(mergeCentreNodePath.y + rowIndex).nodes.get(mergeCentreNodePath.x + columnIndex);
+                                        var cellData = node.data.toJSON();
+                                        cellData.mergeCentre = {
+                                            x: columnIndex > 0 ? columnIndex - 1 : 0,
+                                            y: rowIndex
+                                        };
+                                        editor.setNodeByKey(node.key, { data: cellData });
+                                    }
+                                }
+                            }
+                            initialMergeCellData.colspan = initialMergeCellData.colspan - 1;
+                            editor.setNodeByKey(mergeCentreNode.key, { data: initialMergeCellData });
                         }
                     }
                 }
-
                 if (colSpan > 1) {
-                    for (var rowIndex = 0; rowIndex < rowSpan; rowIndex += 1) {
-                        for (var columnIndex = 0; columnIndex < colSpan; columnIndex += 1) {
-                            if (!(rowIndex === 0 && columnIndex === 0)) {
-                                var nextCell = rows.get(index + rowIndex).nodes.get(at + columnIndex);
+                    for (var _rowIndex = 0; _rowIndex < rowSpan; _rowIndex += 1) {
+                        for (var _columnIndex = 0; _columnIndex < colSpan; _columnIndex += 1) {
+                            if (!(_rowIndex === 0 && _columnIndex === 0)) {
+                                var nextCell = rows.get(index + _rowIndex).nodes.get(at + _columnIndex);
                                 if (nextCell.data.get('isMerged')) {
                                     var data = nextCell.data.toJSON();
                                     delete data.isMerged;
@@ -68,7 +88,6 @@ function removeColumn(opts, editor, at) {
                         }
                     }
                 }
-
                 editor.removeNodeByKey(cell.key).focus();
             });
         });
