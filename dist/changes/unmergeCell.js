@@ -23,7 +23,7 @@ function unmergeCell(opts, editor) {
     var colSpan = firstCell.data.get('colspan') || 1;
     var rowSpan = firstCell.data.get('rowspan') || 1;
 
-    editor.withoutNormalizing(function () {
+    return editor.withoutNormalizing(function () {
         for (var rowCount = 0; rowCount < rowSpan; rowCount += 1) {
             for (var columnCount = 0; columnCount < colSpan; columnCount += 1) {
 
@@ -40,10 +40,11 @@ function unmergeCell(opts, editor) {
                 });
             }
         }
-        editor.focus();
+        var node = editor.value.document.getNode(firstCell.key);
+        setTimeout(function () {
+            return editor.moveToEndOfNode(node.getLastText()).focus();
+        }, 0);
     });
-
-    return editor;
 }
 
 module.exports = unmergeCell;

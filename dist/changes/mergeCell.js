@@ -117,18 +117,15 @@ function mergeCell(opts, editor, mergeOptions) {
             });
 
             var cellContents = (_ref5 = []).concat.apply(_ref5, _toConsumableArray(contents));
-            editor.withoutNormalizing(function () {
-                for (var i = 0; i < cellContents.length; i++) {
-                    editor.insertNodeByKey(currentCell.key, currentCell.nodes.size + i, cellContents[i]);
-                }
-            });
 
-            editor.withoutNormalizing(function () {
-                return nextCells.forEach(function (_ref6) {
-                    var cell = _ref6.cell;
-                    return cell.nodes.forEach(function (node) {
-                        return editor.removeNodeByKey(node.key);
-                    });
+            for (var i = 0; i < cellContents.length; i++) {
+                editor.insertNodeByKey(currentCell.key, currentCell.nodes.size + i, cellContents[i]);
+            }
+
+            nextCells.forEach(function (_ref6) {
+                var cell = _ref6.cell;
+                return cell.nodes.forEach(function (node) {
+                    return editor.removeNodeByKey(node.key);
                 });
             });
 
@@ -137,26 +134,26 @@ function mergeCell(opts, editor, mergeOptions) {
             firstCellData['colspan'] = colSpan;
             firstCellData['mergeDirection'] = createMergeDirection(firstCellData.mergeDirection, direction);
 
-            editor.setNodeByKey(currentCell.key, { data: firstCellData });
+            nextCells.forEach(function (_ref7) {
+                var cell = _ref7.cell,
+                    path = _ref7.path;
 
-            editor.withoutNormalizing(function () {
-                nextCells.forEach(function (_ref7) {
-                    var cell = _ref7.cell,
-                        path = _ref7.path;
-
-                    var nextCellData = cell.data.toJSON();
-                    delete nextCellData.colspan;
-                    delete nextCellData.rowspan;
-                    nextCellData['mergeCentre'] = path;
-                    nextCellData['isMerged'] = true;
-                    nextCellData['mergeDirection'] = createMergeDirection(nextCellData.mergeDirection, direction);
-                    editor.setNodeByKey(cell.key, { data: nextCellData });
-                });
-                editor.focus();
+                var nextCellData = cell.data.toJSON();
+                delete nextCellData.colspan;
+                delete nextCellData.rowspan;
+                nextCellData['mergeCentre'] = path;
+                nextCellData['isMerged'] = true;
+                nextCellData['mergeDirection'] = createMergeDirection(nextCellData.mergeDirection, direction);
+                editor.setNodeByKey(cell.key, { data: nextCellData });
+                editor.setNodeByKey(currentCell.key, { data: firstCellData });
             });
+            var node = editor.value.document.getNode(currentCell.key);
+
+            setTimeout(function () {
+                return editor.moveToEndOfNode(node.getLastText()).focus();
+            }, 0);
         }
     }
-
     return editor;
 }
 
