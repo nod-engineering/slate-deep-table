@@ -93,7 +93,7 @@ function mergeCell(opts, editor, mergeOptions) {
                         if (!(_rowCount === 0 && _columnCount === 0)) {
                             var _nextCell = table.nodes.get(currentCellRowIndex + _rowCount).nodes.get(currentCellColumnIndex + _columnCount);
 
-                            if (_nextCell && !(_nextCell.data.get('isMerged') && _nextCell.data.get('mergeDirection').down)) nextCells.push({ cell: _nextCell, path: { x: _columnCount, y: _rowCount } });
+                            if (_nextCell) nextCells.push({ cell: _nextCell, path: { x: _columnCount, y: _rowCount } });
                         }
                     }
                 }
