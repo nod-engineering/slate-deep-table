@@ -60,11 +60,11 @@ class Example extends React.Component {
   };
 
   onMergeRight = () => {
-    this.onChange(this.editor.mergeCell({ direction: 'right'}));
+    this.onChange(this.editor.mergeCell({ direction: "right" }));
   };
 
   onMergeDown = () => {
-    this.onChange(this.editor.mergeCell({ direction: 'down'}));
+    this.onChange(this.editor.mergeCell({ direction: "down" }));
   };
 
   onUnMerge = () => {
@@ -79,6 +79,18 @@ class Example extends React.Component {
     );
   };
 
+  canMergeRight = () => {
+    return this.editor.canMergeRight();
+  };
+
+  canMergeDown = () => {
+    return this.editor.canMergeDown();
+  };
+
+  canUnMerge = () => {
+    return this.editor.canUnMerge();
+  };
+
   renderTableToolbar = () => {
     return (
       <div className="buttons">
@@ -89,9 +101,15 @@ class Example extends React.Component {
         <button onClick={this.onRemoveRow}>Remove Row</button>
         <button onClick={this.onRemoveTable}>Remove Table</button>
         <button onClick={this.onToggleHeaders}>Toggle Headers</button>
-        <button onClick={this.onMergeRight}>Merge Right</button>
-        <button onClick={this.onMergeDown}>Merge Down</button>
-        <button onClick={this.onUnMerge}>Un-merge</button>
+        {this.canMergeRight() && (
+          <button onClick={this.onMergeRight}>Merge Right</button>
+        )}
+        {this.canMergeDown() && (
+          <button onClick={this.onMergeDown}>Merge Down</button>
+        )}
+        {this.canUnMerge() && (
+          <button onClick={this.onUnMerge}>Un-merge</button>
+        )}
       </div>
     );
   };
@@ -107,7 +125,7 @@ class Example extends React.Component {
           placeholder={"Enter some text..."}
           plugins={plugins}
           value={value}
-          ref={editor => (this.editor = editor)}
+          ref={(editor) => (this.editor = editor)}
           onChange={this.onChange}
           renderBlock={renderBlock}
         />

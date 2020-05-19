@@ -84,7 +84,7 @@ var makeSerializerRules = function makeSerializerRules() {
                 }
 
                 return {
-                    object: "block",
+                    object: 'block',
                     type: opts.typeTable,
                     data: data,
                     nodes: next(el.childNodes)
@@ -95,7 +95,7 @@ var makeSerializerRules = function makeSerializerRules() {
 
             if (type) {
                 return {
-                    object: "block",
+                    object: 'block',
                     type: type,
                     data: {},
                     nodes: next(el.childNodes)
